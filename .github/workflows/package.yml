@@ -1,10 +1,14 @@
 name: Package Application with Pyinstaller
 
 on:
+    release:
+      types: [ published ]
     push:
       branches: [ master ]
     pull_request:
       branches: [ master ]
+
+permissions: write-all
 
 jobs:
   build:
@@ -34,3 +38,10 @@ jobs:
         with:
           name: weblogin
           path: dist/weblogin.exe
+
+      - name: Upload to release
+        if: github.event_name == 'release'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} dist/weblogin.exe

@@ -1,4 +1,4 @@
-name: Package Application with Pyinstaller
+name: Package Application with Nuitka
 
 on:
     release:
@@ -12,8 +12,14 @@ permissions: write-all
 
 jobs:
   build:
-
-    runs-on: windows-2019
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        arch: [x64]
+        include:
+          - os: macos-latest
+            arch: arm64
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -30,18 +36,41 @@ jobs:
             pip install pyinstaller
             pip install -r requirements.txt
 
-      - name: Build
-        run: pyinstaller -F weblogin.py
+      - name: Build Executable
+        uses: Nuitka/Nuitka-Action@main
+        with:
+          nuitka-version: main
+          script-name: weblogin.py
+          onefile: true
 
-      - name: Upload artifact
+      - name: Rename Executable
+        if: matrix.os != 'windows-latest'
+        run: |
+          mv build/weblogin.bin build/weblogin-${{ runner.os }}-${{ matrix.arch }}
+
+      - name: Upload artifact (Windows)
+        if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v2
         with:
-          name: weblogin
-          path: dist/weblogin.exe
+          name: weblogin-${{ runner.os }}-${{ matrix.arch }}
+          path: build/weblogin.exe
 
-      - name: Upload to release
-        if: github.event_name == 'release'
+      - name: Upload artifact (non-Windows)
+        if: matrix.os != 'windows-latest'
+        uses: actions/upload-artifact@v2
+        with:
+          name: weblogin-${{ runner.os }}-${{ matrix.arch }}
+          path: build/weblogin-${{ runner.os }}-${{ matrix.arch }}
+
+      - name: Upload to release (Windows)
+        if: github.event_name == 'release' && matrix.os == 'windows-latest'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          gh release upload ${{ github.event.release.tag_name }} dist/weblogin.exe
+          gh release upload ${{ github.event.release.tag_name }} build/weblogin.exe
+      - name: Upload to release (non-Windows)
+        if: github.event_name == 'release' && matrix.os != 'windows-latest'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} build/weblogin-${{ runner.os }}-${{ matrix.arch }}

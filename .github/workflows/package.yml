@@ -14,7 +14,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [windows-2019, ubuntu-latest, macos-latest]
         arch: [x64]
         include:
           - os: macos-latest
@@ -33,7 +33,6 @@ jobs:
       - name: Install dependencies
         run: |
             python -m pip install --upgrade pip
-            pip install pyinstaller
             pip install -r requirements.txt
 
       - name: Build Executable
@@ -44,32 +43,32 @@ jobs:
           onefile: true
 
       - name: Rename Executable
-        if: matrix.os != 'windows-latest'
+        if: matrix.os != 'windows-2019'
         run: |
           mv build/weblogin.bin build/weblogin-${{ runner.os }}-${{ matrix.arch }}
 
       - name: Upload artifact (Windows)
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-2019'
         uses: actions/upload-artifact@v2
         with:
           name: weblogin-${{ runner.os }}-${{ matrix.arch }}
           path: build/weblogin.exe
 
       - name: Upload artifact (non-Windows)
-        if: matrix.os != 'windows-latest'
+        if: matrix.os != 'windows-2019'
         uses: actions/upload-artifact@v2
         with:
           name: weblogin-${{ runner.os }}-${{ matrix.arch }}
           path: build/weblogin-${{ runner.os }}-${{ matrix.arch }}
 
       - name: Upload to release (Windows)
-        if: github.event_name == 'release' && matrix.os == 'windows-latest'
+        if: github.event_name == 'release' && matrix.os == 'windows-2019'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           gh release upload ${{ github.event.release.tag_name }} build/weblogin.exe
       - name: Upload to release (non-Windows)
-        if: github.event_name == 'release' && matrix.os != 'windows-latest'
+        if: github.event_name == 'release' && matrix.os != 'windows-2019'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |

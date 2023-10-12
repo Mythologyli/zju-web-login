@@ -41,7 +41,7 @@ except getopt.GetoptError:
     exit(0)
 
 ip = ""
-url = "https://net2.zju.edu.cn"
+url = "https://net.zju.edu.cn"
 
 for opt, arg in opts:
     if opt in ['-u', '--username']:
@@ -282,6 +282,7 @@ if __name__ == '__main__':
         session.mount('https://', SourceAddressAdapter(ip))
 
     session.trust_env = False
+    session.verify = False
 
     if action == 'login':
         init()

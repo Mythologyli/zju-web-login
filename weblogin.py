@@ -10,7 +10,10 @@ import sys
 import time
 
 import requests
+import urllib3
 from requests_toolbelt.adapters.source import SourceAddressAdapter
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 _PADCHAR = "="
 _ALPHA = "LVoJPiCN2R8G90yg+hmFHuacZ1OWMnrsSTXkYpUq/3dlbfKwv6xztjI7DeBE45QA"

@@ -205,8 +205,17 @@ def init():
     print("[Init]")
     global ip, ac_id, randnum
     init_res = session.get(init_url)
-    ac_id = re.search('id="ac_id" value="(.*?)"', init_res.text).group(1)
-    ip = re.search('id="user_ip" value="(.*?)"', init_res.text).group(1)
+    match = re.search(r'<meta\s+http-equiv=["\']refresh["\']\s+content=["\'][^"\']*url=([^"\']+)["\']', init_res.text)
+    if match:
+        # New portal page
+        redirect_url = url + match.group(1).replace('&amp;', '&')
+        print(f"Redirect: {redirect_url}")
+        init_res = session.get(redirect_url)
+        ac_id = re.search('acid   : "(.*?)"', init_res.text).group(1)
+        ip = re.search('ip     : "(.*?)"', init_res.text).group(1)
+    else:
+        ac_id = re.search('id="ac_id" value="(.*?)"', init_res.text).group(1)
+        ip = re.search('id="user_ip" value="(.*?)"', init_res.text).group(1)
     randnum = str(random.randint(1, 1234567890123456789012))
     print("ac_id:" + ac_id)
     print("ip:" + ip)

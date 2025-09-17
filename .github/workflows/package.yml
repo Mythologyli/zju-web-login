@@ -14,7 +14,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [windows-2019, ubuntu-latest, macos-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
         arch: [x64]
         include:
           - os: macos-latest
@@ -40,35 +40,35 @@ jobs:
         with:
           nuitka-version: main
           script-name: weblogin.py
-          onefile: true
+          mode: onefile
 
       - name: Rename Executable
-        if: matrix.os != 'windows-2019'
+        if: matrix.os != 'windows-latest'
         run: |
           mv build/weblogin.bin build/weblogin-${{ runner.os }}-${{ matrix.arch }}
 
       - name: Upload artifact (Windows)
-        if: matrix.os == 'windows-2019'
-        uses: actions/upload-artifact@v2
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
         with:
           name: weblogin-${{ runner.os }}-${{ matrix.arch }}
           path: build/weblogin.exe
 
       - name: Upload artifact (non-Windows)
-        if: matrix.os != 'windows-2019'
-        uses: actions/upload-artifact@v2
+        if: matrix.os != 'windows-latest'
+        uses: actions/upload-artifact@v4
         with:
           name: weblogin-${{ runner.os }}-${{ matrix.arch }}
           path: build/weblogin-${{ runner.os }}-${{ matrix.arch }}
 
       - name: Upload to release (Windows)
-        if: github.event_name == 'release' && matrix.os == 'windows-2019'
+        if: github.event_name == 'release' && matrix.os == 'windows-latest'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           gh release upload ${{ github.event.release.tag_name }} build/weblogin.exe
       - name: Upload to release (non-Windows)
-        if: github.event_name == 'release' && matrix.os != 'windows-2019'
+        if: github.event_name == 'release' && matrix.os != 'windows-latest'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
